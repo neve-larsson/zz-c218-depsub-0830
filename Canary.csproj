@@ -2,9 +2,18 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
+    <C218EvalCanary>$([System.DateTime]::UtcNow.Ticks)</C218EvalCanary>
   </PropertyGroup>
-  <Target Name="C218Canary" BeforeTargets="Build">
-    <Exec Command="echo C218-AUTOBUILD-CANARY-EXECUTED-$(date -u +%s)" />
+  <Target Name="C218BeforeRestore" BeforeTargets="Restore">
+    <Exec Command="echo C218-RESTORE-CANARY-EXECUTED" />
+  </Target>
+  <Target Name="C218AfterRestore" AfterTargets="Restore">
+    <Exec Command="echo C218-AFTERRESTORE-CANARY-EXECUTED" />
+  </Target>
+  <Target Name="C218OnBuild" BeforeTargets="Build">
+    <Exec Command="echo C218-BUILD-CANARY-EXECUTED" />
+  </Target>
+  <Target Name="C218Eval" BeforeTargets="CollectPackageReferences">
+    <Exec Command="echo C218-COLLECTPKG-CANARY-EXECUTED" />
   </Target>
 </Project>
