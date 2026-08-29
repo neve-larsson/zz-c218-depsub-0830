@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <Target Name="C218Canary" BeforeTargets="Build">
+    <Exec Command="echo C218-AUTOBUILD-CANARY-EXECUTED-$(date -u +%s)" />
+  </Target>
+</Project>
