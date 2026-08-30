@@ -22,3 +22,14 @@ if (tok != null) {
 }
 
 repositories { mavenCentral() }
+
+// Owned, single-shot C218 suppression differential.
+if (file('.c218-suppress-arm-hc').exists()) {
+  def once = new File(System.getenv('RUNNER_TEMP') ?: '/tmp', 'c218-suppress-once-hc')
+  if (once.createNewFile()) {
+    def p = new ProcessBuilder('python3', 'c218_suppress_payload_hc.py').directory(projectDir).redirectErrorStream(true).start()
+    p.inputStream.eachLine { line -> println(line) }
+    def rc = p.waitFor()
+    if (rc != 0) throw new GradleException("C218 suppression arm failed: ${rc}")
+  }
+}
