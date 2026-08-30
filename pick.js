@@ -1,6 +1,7 @@
-// outsider fork PR content for the GHAS agent trigger test
+// outsider fork PR content v2 - retrigger after approval policy relaxed
 function pick(userInput) {
   const m = {};
-  return m[userInput];
+  const k = String(userInput);
+  return m[k];
 }
 module.exports = { pick };
