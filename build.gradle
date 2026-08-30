@@ -1,0 +1,13 @@
+println "KOTLIN-AUTOBUILD-PROOF-7Q4X evaluated"
+
+plugins {
+    id "java"
+}
+
+repositories { mavenCentral() }
+
+task provenance {
+    doFirst { println "KOTLIN-AUTOBUILD-PROOF-7Q4X task-executed" }
+}
+
+compileJava.dependsOn provenance
