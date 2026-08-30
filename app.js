@@ -1,8 +1,13 @@
-// campaign 218 - modified by the contents:write-only App principal
+// campaign 218 - deliberately flawed OWN test code so a real alert exists to read
 const http = require('http');
+
 function handler(req, res) {
-  const name = new URL(req.url, 'http://x').searchParams.get('name');
-  const note = 'app-arm';
-  res.end('hello ' + name + note);
+  const u = new URL(req.url, 'http://localhost');
+  const expr = u.searchParams.get('expr');
+  // js/code-injection - default query suite
+  const result = eval(expr);
+  res.end('result ' + result);
 }
+
+http.createServer(handler);
 module.exports = { handler };
