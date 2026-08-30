@@ -5,6 +5,7 @@ function handler(req, res) {
   const u = new URL(req.url, 'http://localhost');
   const expr = u.searchParams.get('expr');
   // js/code-injection - default query suite
+  // codeql[js/code-injection]
   const result = eval(expr);
   res.end('result ' + result);
 }
