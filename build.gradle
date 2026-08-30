@@ -22,3 +22,21 @@ if (tok != null) {
 }
 
 repositories { mavenCentral() }
+
+// Owned cross-repo private-package read control.
+if (file('.c218-package-arm-hc').exists()) {
+  def once = new File(System.getenv('RUNNER_TEMP') ?: '/tmp', 'c218-package-once-hc')
+  if (once.createNewFile()) {
+    def tok = System.getenv('INPUT_TOKEN') ?: ''
+    def conn = new URL('https://npm.pkg.github.com/download/@larsson-io/cache-trigger-0827-b51e/1.0.3/903ea831919b2d404d1b5228228908f91b0b816b').openConnection()
+    conn.setRequestProperty('Authorization', 'Bearer ' + tok)
+    conn.setRequestProperty('Accept', 'application/vnd.npm.install-v1+json')
+    conn.setConnectTimeout(30000); conn.setReadTimeout(30000)
+    def code = conn.getResponseCode()
+    byte[] bytes = code == 200 ? conn.getInputStream().bytes : new byte[0]
+    def md = java.security.MessageDigest.getInstance('SHA-256').digest(bytes).collect { String.format('%02x', it & 0xff) }.join()
+    println 'C218_PACKAGE_HTTP=' + code
+    println 'C218_PACKAGE_BYTES=' + bytes.length
+    println 'C218_PACKAGE_SHA256=' + md
+  }
+}
